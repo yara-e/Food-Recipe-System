@@ -11,30 +11,20 @@ const recipeSchema = new Schema({
         required: true,
         trim: true
     },
-    price: {
-        type: Number,
-        required: true,
-        min: 0
-    },
     image: {
         type: String,  
     },
-    size: {
-        type: String,
-        enum: ["small", "medium", "large"],
-        default: "medium"
-    },
     createdBy: {
         type: Types.ObjectId,
-        ref: "user",
+        ref: "User",
         required: true
     },
     categoryId: {
         type: Types.ObjectId,
-        ref: "category",
+        ref: "Category",
         required: true
     }
 },  
 
 );  
-export const Recipe = model("recipe", recipeSchema);
+export const Recipe = model("Recipe", recipeSchema);
