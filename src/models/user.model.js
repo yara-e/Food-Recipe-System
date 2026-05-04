@@ -1,33 +1,41 @@
 import { model, Schema } from "mongoose";
 
-const userSchema =new Schema({
-    name:{
-        type:String,
-        required:true,
-        trim:true
+const userSchema = new Schema(
+  {
+    name: {
+      type: String,
+      required: true,
+      trim: true,
     },
-    email:{
-        type:String,
-        required:true,
+     email: {
+       type: String,
+       required: true,
+       unique: true,
+       trim: true,
+       lowercase: true,
+     },
+    password: {
+      type: String,
+      required: true,
+      select: false,
     },
-    password:{
-        type:String,
-        required:true,
+    role: {
+      type: String,
+      enum: ["user", "admin"],
+      default: "user",
     },
-    role:{
-        type:String,
-        enum:["user","admin"],
-        default:"user"
+    status: {
+      type: String,
+      enum: ["active", "inactive"],
+      default: "active",
     },
-    status:{
-        type:String,
-        enum:["active","inactive"],
-        default:"active"
+    otp: {
+      type: String,
     },
-    otp:{
-        type:String,
-    },
-    otpExpire:Date
-})
+    otpExpire: Date,
+  },
+  {timestamps: true},
+);
+// userSchema.index({ email: 1 });
 
-export const User = model("user",userSchema)
+export const User = model("User", userSchema);
