@@ -11,7 +11,8 @@ const favoriteSchema = new Schema({
     ref: "Recipe",
     required: true,
   },
-});
+},
+{timestamps: true},);
 
 favoriteSchema.index({ userId: 1, recipeId: 1 }, { unique: true });
 

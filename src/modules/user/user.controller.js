@@ -4,10 +4,11 @@ export const addUser = async (req, res) => {
   try {
     if (!req.body.name || !req.body.email || !req.body.password) {
       return res
-        .status(400).json({ message: "Name, email, and password are required" });
+        .status(400)
+        .json({ message: "Name, email, and password are required" });
     }
     if (req.body.password) {
-      req.body.password = hashPassword(req.body.password);
+      req.body.password = await hashPassword(req.body.password);
     }
 
     let data = new User(req.body);
@@ -24,7 +25,7 @@ export const addUser = async (req, res) => {
 
 export const getAllUsers = async (req, res) => {
   try {
-    let data = await User.find();
+    let data = await User.find().select("-password");
     res.status(200).json({ message: "success", data });
   } catch (error) {
     res
@@ -36,7 +37,7 @@ export const getAllUsers = async (req, res) => {
 export const getOneUser = async (req, res) => {
   try {
     let { id } = req.params;
-    let data = await User.findById(id);
+    let data = await User.findById(id).select("-password");
 
     if (!data) {
       return res.status(404).json({ message: "User not found" });
@@ -53,14 +54,20 @@ export const getOneUser = async (req, res) => {
 export const updateUser = async (req, res) => {
   try {
     let { id } = req.params;
+    const { name, email } = req.body;
 
-    if (req.body.password) {
-      req.body.password = hashPassword(req.body.password);
-    }
+    // if (req.body.password) {
+    //   req.body.password = hashPassword(req.body.password);
+    // }
 
-    let data = await User.findByIdAndUpdate(id, req.body, {
-      returnDocument: "after",
-    });
+    let data = await User.findByIdAndUpdate(
+      id,
+      { name, email },
+      {
+        returnDocument: "after",
+        projection: { password: 0 },
+      },
+    );
 
     if (!data) {
       return res.status(404).json({ message: "User not found" });

@@ -6,21 +6,19 @@ import {
   updateRecipe,
   deleteRecipe,
 } from "./recipe.controller.js";
-import { upload } from "../../middlewares/multer.js";
+import { upload } from "../../utils/upload.js";
 
 const recipeRouter = Router();
 
- 
 recipeRouter
   .route("/")
-  .post(upload.single("image"), addRecipe)
+  .post(upload , addRecipe)
   .get(getAllRecipes);
 
- 
 recipeRouter
   .route("/:id")
   .get(getOneRecipe)
-  .put(upload.single("image"), updateRecipe)
+  .put(upload , updateRecipe)
   .delete(deleteRecipe);
 
 export { recipeRouter };

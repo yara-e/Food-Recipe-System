@@ -1,4 +1,5 @@
 import { Recipe } from "../../models/recipe.model.js";
+import { deleteFiles } from "../../utils/deleteFile.js";
 
 export const addRecipe = async (req, res) => {
   try {
@@ -10,7 +11,13 @@ export const addRecipe = async (req, res) => {
       });
     }
 
-    const imagePath = req.file ? req.file.path : "src/uploads/default.png";
+    let imagePath;
+
+    if (req.files && req.files.length > 0) {
+      imagePath = req.files.map((file) => file.path);
+    } else {
+      imagePath = ["uploads/recipes/default.png"];
+    }
 
     const recipe = new Recipe({
       ...req.body,
@@ -56,11 +63,22 @@ export const updateRecipe = async (req, res) => {
   try {
     const { id } = req.params;
 
-    if (req.file) {
-      req.body.image = req.file.path;
-    }
+    const { title, description, categoryId } = req.body;
+    const updateData = { title, description, categoryId };
 
-    const recipe = await Recipe.findByIdAndUpdate(id, req.body, {
+    if (req.files && req.files.length > 0) {
+      const existingRecipe = await Recipe.findById(id);
+      if (!existingRecipe) {
+        return res.status(404).json({ message: "Recipe not found" });
+      }
+
+      if (existingRecipe.image && existingRecipe.image.length > 0) {
+        await deleteFiles(existingRecipe.image);
+      }
+
+      updateData.image = req.files.map((file) => file.path);
+    }
+    const recipe = await Recipe.findByIdAndUpdate(id, updateData, {
       returnDocument: "after",
     }).populate("categoryId", "name");
 
@@ -81,6 +99,11 @@ export const deleteRecipe = async (req, res) => {
     if (!recipe) {
       return res.status(404).json({ message: "Recipe not found" });
     }
+
+    if (recipe.image && recipe.image.length > 0) {
+      await deleteFiles(recipe.image);
+    }
+
     res.status(200).json({ message: "success" });
   } catch (error) {
     res.status(500).json({ message: "Server Error", error: error.message });
