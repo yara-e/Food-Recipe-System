@@ -29,7 +29,7 @@ const recipeSchema = new Schema({
 },
 {timestamps: true},);
 
-recipeSchema.post(["find", "findOne", "findOneAndUpdate"], (docs) => {
+recipeSchema.post(["find", "findOne", "findByIdAndUpdate", "findByIdAndDelete"], (docs) => {
   const res = Array.isArray(docs) ? docs : [docs];
 
   res.forEach((doc) => {

@@ -1,100 +1,65 @@
 import { User } from "../../models/user.model.js";
 import { hashPassword } from "../../utils/hashPassword.js";
-export const addUser = async (req, res) => {
-  try {
-    if (!req.body.name || !req.body.email || !req.body.password) {
-      return res
-        .status(400)
-        .json({ message: "Name, email, and password are required" });
-    }
-    if (req.body.password) {
-      req.body.password = await hashPassword(req.body.password);
-    }
+import { catchError } from "../../utils/catchError.js";
+import { AppError } from "../../utils/AppError.js";
 
-    let data = new User(req.body);
-    await data.save();
-
-    const { password, ...dataWithoutPassword } = data._doc;
-    res.status(201).json({ message: "success", data: dataWithoutPassword });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+export const addUser = catchError(async (req, res, next) => {
+  if (!req.body.name || !req.body.email || !req.body.password) {
+    return next(new AppError("Name, email, and password are required", 400));
   }
-};
 
-export const getAllUsers = async (req, res) => {
-  try {
-    let data = await User.find().select("-password");
-    res.status(200).json({ message: "success", data });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+  req.body.password = await hashPassword(req.body.password);
+
+  let data = new User(req.body);
+  await data.save();
+
+  const { password, ...dataWithoutPassword } = data._doc;
+  res.status(201).json({ message: "success", data: dataWithoutPassword });
+});
+
+export const getAllUsers = catchError(async (req, res, next) => {
+  let data = await User.find().select("-password");
+  res.status(200).json({ message: "success", data });
+});
+
+export const getOneUser = catchError(async (req, res, next) => {
+  let { id } = req.params;
+  let data = await User.findById(id).select("-password");
+
+  if (!data) {
+    return next(new AppError("User not found", 404));
   }
-};
 
-export const getOneUser = async (req, res) => {
-  try {
-    let { id } = req.params;
-    let data = await User.findById(id).select("-password");
+  res.status(200).json({ message: "success", data });
+});
 
-    if (!data) {
-      return res.status(404).json({ message: "User not found" });
-    }
+export const updateUser = catchError(async (req, res, next) => {
+  let { id } = req.params;
+  const { name, email } = req.body;
 
-    res.status(200).json({ message: "success", data });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+  let data = await User.findByIdAndUpdate(
+    id,
+    { name, email },
+    {
+      new: true,
+      projection: { password: 0 },
+    },
+  );
+
+  if (!data) {
+    return next(new AppError("User not found", 404));
   }
-};
 
-export const updateUser = async (req, res) => {
-  try {
-    let { id } = req.params;
-    const { name, email } = req.body;
+  res.status(200).json({ message: "success", data });
+});
 
-    // if (req.body.password) {
-    //   req.body.password = hashPassword(req.body.password);
-    // }
+export const deleteUser = catchError(async (req, res, next) => {
+  let { id } = req.params;
+  let data = await User.findByIdAndDelete(id);
 
-    let data = await User.findByIdAndUpdate(
-      id,
-      { name, email },
-      {
-        returnDocument: "after",
-        projection: { password: 0 },
-      },
-    );
-
-    if (!data) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({ message: "success", data });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Internal server error", error: error.message });
+  if (!data) {
+    return next(new AppError("User not found", 404));
   }
-};
 
-export const deleteUser = async (req, res) => {
-  try {
-    let { id } = req.params;
-
-    let data = await User.findByIdAndDelete(id);
-
-    if (!data) {
-      return res.status(404).json({ message: "User not found" });
-    }
-
-    res.status(200).json({ message: "success" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error deleting user", error: error.message });
-  }
-};
+  res.status(200).json({ message: "success" });
+});

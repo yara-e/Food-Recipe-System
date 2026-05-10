@@ -1,87 +1,55 @@
 import { Category } from "../../models/category.model.js";
+import { catchError } from "../../utils/catchError.js";
+import { AppError } from "../../utils/AppError.js";
 
-export const addCategory = async (req, res) => {
-  try {
-    const { name, description } = req.body;
-    if (!name || !description) {
-      return res
-        .status(400)
-        .json({ message: "Name and description are required" });
-    }
-
-    const category = new Category({ name, description });
-    await category.save();
-    res.status(201).json({ message: "success", data: category });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+export const addCategory = catchError(async (req, res, next) => {
+  const { name, description } = req.body;
+  if (!name || !description) {
+    return next(new AppError("Name and description are required", 400));
   }
-};
 
-export const getAllCategories = async (req, res) => {
-  try {
-    const categories = await Category.find();
-    res.status(200).json({ message: "success", data: categories });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+  const category = new Category({ name, description });
+  await category.save();
+  res.status(201).json({ message: "success", data: category });
+});
+
+export const getAllCategories = catchError(async (req, res, next) => {
+  const categories = await Category.find();
+  res.status(200).json({ message: "success", data: categories });
+});
+
+export const getOneCategory = catchError(async (req, res, next) => {
+  const { id } = req.params;
+  const category = await Category.findById(id);
+
+  if (!category) {
+    return next(new AppError("Category not found", 404));
   }
-};
+  res.status(200).json({ message: "success", data: category });
+});
 
-export const getOneCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const category = await Category.findById(id);
+export const updateCategory = catchError(async (req, res, next) => {
+  const { id } = req.params;
+  const { name, description } = req.body;
 
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-    res.status(200).json({ message: "success", data: category });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+  const category = await Category.findByIdAndUpdate(
+    id,
+    { name, description },
+    { new: true },
+  );
+
+  if (!category) {
+    return next(new AppError("Category not found", 404));
   }
-};
+  res.status(200).json({ message: "success", data: category });
+});
 
-export const updateCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const { name, description } = req.body;
+export const deleteCategory = catchError(async (req, res, next) => {
+  const { id } = req.params;
+  const category = await Category.findByIdAndDelete(id);
 
-    const category = await Category.findByIdAndUpdate(
-      id,
-      { name, description },
-      {
-        returnDocument: "after",
-      },
-    );
-
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-    res.status(200).json({ message: "success", data: category });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
+  if (!category) {
+    return next(new AppError("Category not found", 404));
   }
-};
-
-export const deleteCategory = async (req, res) => {
-  try {
-    const { id } = req.params;
-    const category = await Category.findByIdAndDelete(id);
-
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
-    }
-    res.status(200).json({ message: "success" });
-  } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Something went wrong", error: error.message });
-  }
-};
+  res.status(200).json({ message: "success" });
+});

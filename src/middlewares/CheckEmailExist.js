@@ -1,15 +1,11 @@
 import { User } from "../models/user.model.js";
- 
-import { hashPassword } from "../utils/hashPassword.js";
+import { AppError } from "../utils/AppError.js";
+import { catchError } from "../utils/catchError.js";
 
-export const checkEmail = async (req, res, next) => {
-  try {
-    const isExist = await User.findOne({ email: req.body.email });
-    if (isExist) {
-      return res.status(409).json({ message: "Email already exists" });
-    }
-    next();
-  } catch (error) {
-    next(error);
+export const checkEmail = catchError(async (req, res, next) => {
+  const isExist = await User.findOne({ email: req.body.email });
+  if (isExist) {
+    return next(new AppError("Email already exists", 409));
   }
-};
+  next();
+});
