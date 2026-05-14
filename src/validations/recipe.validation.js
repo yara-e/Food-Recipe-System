@@ -5,7 +5,7 @@ export const addRecipeSchema = Joi.object({
   description: Joi.string().min(10).required(),
   ingredients: Joi.array().items(Joi.string()).min(1).required(),
   instructions: Joi.string().required(),
-  categoryId: objectIdValidation.required(),
+  categoryId: Joi.string().hex().length(24).required(),
   image: Joi.string(),
 });
 
@@ -15,7 +15,7 @@ export const updateRecipeSchema = Joi.object({
   description: Joi.string().min(10),
   ingredients: Joi.array().items(Joi.string()),
   instructions: Joi.string(),
-  categoryId: objectIdValidation,
+  categoryId: Joi.string().hex().length(24).required(),
 });
 
 export const deleteRecipeSchema = Joi.object({
