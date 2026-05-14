@@ -1,5 +1,9 @@
 process.on("uncaughtException", (err) => {
-  console.log(err.name, err.message);
+  console.error(err.name, err.message);
+  process.exit(1);
+});
+process.on("unhandledRejection", (err) => {
+  console.error(err.name, err.message);
   process.exit(1);
 });
 
@@ -13,6 +17,7 @@ import { favoriteRouter } from "./modules/favorite/favorite.routes.js";
 import { globalError } from "./middlewares/globalError.js";
 import path from "path";
 import authRouter from "./modules/auth/auth.routes.js";
+import { AppError } from "./utils/AppError.js";
 
 const app = express();
 const port = process.env.PORT || 3000;
@@ -38,7 +43,4 @@ dbConnect().then(() => {
   });
 });
 
-process.on("unhandledRejection", (err) => {
-  console.log(err.name, err.message);
-  process.exit(1);
-});
+

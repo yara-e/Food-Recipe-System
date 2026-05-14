@@ -6,22 +6,35 @@ import { hashPassword } from "../../utils/hashPassword.js";
 import bcrypt from "bcrypt";
 
 export const signUp = catchError(async (req, res, next) => {
-  if (!req.body.name || !req.body.email || !req.body.password) {
+  const { name, email, password } = req.body;
+  if (!name || !email || !password) {
     return next(new AppError("Name, email, and password are required", 400));
   }
 
-  req.body.password = await hashPassword(req.body.password);
+  const hashedPassword = await hashPassword(password);
 
-  let data = new User(req.body);
-  await data.save();
+  const user = new User({
+    name,
+    email,
+    password: hashedPassword,
+  });
 
-  res
-    .status(201)
-    .json({ message: "success", data: { name: data.name, email: data.email } });
+  await user.save();
+
+  res.status(201).json({
+    message: "success",
+    data: {
+      name: user.name,
+      email: user.email,
+    },
+  });
 });
 
 export const signIn = catchError(async (req, res, next) => {
   const { email, password } = req.body;
+  if (!email || !password) {
+    return next(new AppError("Email and password are required", 400));
+  }
   const user = await User.findOne({ email }).select("+password");
 
   if (!user) {

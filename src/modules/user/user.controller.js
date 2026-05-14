@@ -7,7 +7,7 @@ export const addUser = catchError(async (req, res, next) => {
   if (!req.body.name || !req.body.email || !req.body.password) {
     return next(new AppError("Name, email, and password are required", 400));
   }
-
+  
   req.body.password = await hashPassword(req.body.password);
 
   let data = new User(req.body);
