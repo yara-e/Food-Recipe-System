@@ -2,7 +2,8 @@ import { Favorite } from "../../models/favorite.model.js";
 import { catchError } from "../../utils/catchError.js";
 
 export const toggleFavorite = catchError(async (req, res, next) => {
-  const { userId, recipeId } = req.body;
+  const userId = req.user._id;
+  const { recipeId } = req.body;
 
   const existingFavorite = await Favorite.findOneAndDelete({
     userId,

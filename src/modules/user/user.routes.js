@@ -11,11 +11,11 @@ import { validate } from "../../middlewares/validation.middleware.js";
 import {
   addUserSchema,
   updateUserSchema,
-  deleteUserSchema,
+  UserIdSchema,
 } from "../../validations/user.validation.js";
-
+import { protectedRoutes } from "../../middlewares/auth.middleware.js";
 const userRouter = Router();
-
+userRouter.use(protectedRoutes);
 userRouter
   .route("/")
   .post(validate(addUserSchema), checkEmail, addUser)
@@ -23,8 +23,8 @@ userRouter
 
 userRouter
   .route("/:id")
-  .get(getOneUser)
+  .get(validate(UserIdSchema), getOneUser)
   .put(validate(updateUserSchema), updateUser)
-  .delete(validate(deleteUserSchema), deleteUser);
+  .delete(validate(UserIdSchema), deleteUser);
 
 export { userRouter };

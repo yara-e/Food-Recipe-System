@@ -1,10 +1,14 @@
 import Joi from "joi";
- 
+import { objectIdValidation } from "../utils/validationHelpers.js";
 
 export const toggleFavoriteSchema = Joi.object({
-  
-  userId: Joi.string().hex().length(24).required(),
-  recipeId: Joi.string().hex().length(24).required()
+  body: Joi.object({
+    recipeId: objectIdValidation.required(),
+  }).unknown(false),
 });
 
- 
+export const getFavoritesSchema = Joi.object({
+  params: Joi.object({
+    userId: objectIdValidation.required(),
+  }).unknown(false),
+});

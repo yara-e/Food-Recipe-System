@@ -10,21 +10,22 @@ import { upload } from "../../utils/upload.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import {
   addRecipeSchema,
-  deleteRecipeSchema,
+  recipeIdSchema,
   updateRecipeSchema,
-} from "./../../validations/recipe.validation";
+} from "./../../validations/recipe.validation.js";
+import { protectedRoutes } from "../../middlewares/auth.middleware.js";
 
 const recipeRouter = Router();
 
 recipeRouter
   .route("/")
-  .post(upload, validate(addRecipeSchema), addRecipe)
+  .post(protectedRoutes, upload, validate(addRecipeSchema), addRecipe)
   .get(getAllRecipes);
 
 recipeRouter
   .route("/:id")
-  .get(getOneRecipe)
-  .put(upload, validate(updateRecipeSchema), updateRecipe)
-  .delete(validate(deleteRecipeSchema), deleteRecipe);
+  .get(validate(recipeIdSchema), getOneRecipe)
+  .put(protectedRoutes, validate(updateRecipeSchema), upload, updateRecipe)
+  .delete(protectedRoutes, validate(recipeIdSchema), deleteRecipe);
 
 export { recipeRouter };

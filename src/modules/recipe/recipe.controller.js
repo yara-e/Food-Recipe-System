@@ -4,14 +4,11 @@ import { catchError } from "../../utils/catchError.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const addRecipe = catchError(async (req, res, next) => {
-  const { title, description, createdBy, categoryId } = req.body;
+  const { title, description, categoryId } = req.body;
 
-  if (!title || !description || !createdBy || !categoryId) {
+  if (!title || !description || !categoryId) {
     return next(
-      new AppError(
-        "title, description, createdBy, and categoryId are required",
-        400,
-      ),
+      new AppError("title, description, and categoryId are required", 400),
     );
   }
 
@@ -22,6 +19,7 @@ export const addRecipe = catchError(async (req, res, next) => {
 
   const recipe = new Recipe({
     ...req.body,
+    createdBy: req.user._id,
     image: imagePath,
   });
 

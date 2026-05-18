@@ -10,11 +10,12 @@ import { validate } from "../../middlewares/validation.middleware.js";
 import {
   addCategorySchema,
   updateCategorySchema,
-  deleteCategorySchema,
+  categoryIdSchema,
 } from "../../validations/category.validation.js";
+import { protectedRoutes } from "../../middlewares/auth.middleware.js";
 
 const categoryRouter = Router();
-
+categoryRouter.use(protectedRoutes);
 categoryRouter
   .route("/")
   .post(validate(addCategorySchema), addCategory)
@@ -22,8 +23,8 @@ categoryRouter
 
 categoryRouter
   .route("/:id")
-  .get(getOneCategory)
+  .get(validate(categoryIdSchema), getOneCategory)
   .put(validate(updateCategorySchema), updateCategory)
-  .delete(validate(deleteCategorySchema), deleteCategory);
+  .delete(validate(categoryIdSchema), deleteCategory);
 
 export { categoryRouter };

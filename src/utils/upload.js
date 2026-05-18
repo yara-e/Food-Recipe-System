@@ -26,6 +26,8 @@ const multerUpload = multer({
   limits: { fileSize: 2 * 1024 * 1024 },
 }).array("image", 5);
 
+ 
+
 export const upload = (req, res, next) => {
   multerUpload(req, res, (err) => {
     if (err instanceof multer.MulterError) {
