@@ -1,31 +1,57 @@
 import { Router } from "express";
 import {
   addRecipe,
-  getAllRecipes,
-  getOneRecipe,
   updateRecipe,
   deleteRecipe,
+  getAllRecipes,
+  getOneRecipe,
 } from "./recipe.controller.js";
-import { upload } from "../../utils/upload.js";
+import { protectedRoutes } from "../../middlewares/auth.middleware.js";
 import { validate } from "../../middlewares/validation.middleware.js";
 import {
   addRecipeSchema,
-  recipeIdSchema,
   updateRecipeSchema,
-} from "./../../validations/recipe.validation.js";
-import { protectedRoutes } from "../../middlewares/auth.middleware.js";
+  recipeIdSchema,
+} from "../../validations/recipe.validation.js";
+import { upload } from "../../utils/upload.js";
+import { allowedTo } from "../../middlewares/role.middleware.js";
 
 const recipeRouter = Router();
 
+// ==========================================
+// PUBLIC ROUTES
+// ==========================================
+recipeRouter.route("/").get(getAllRecipes);
+recipeRouter.route("/:id").get(validate(recipeIdSchema), getOneRecipe);
+
+// ==========================================
+// PROTECTED ROUTES
+// ==========================================
 recipeRouter
   .route("/")
-  .post(protectedRoutes, upload, validate(addRecipeSchema), addRecipe)
-  .get(getAllRecipes);
-
+  .post(
+    protectedRoutes,
+    allowedTo("admin"),
+    upload,
+    validate(addRecipeSchema),
+    addRecipe,
+  );
 recipeRouter
   .route("/:id")
-  .get(validate(recipeIdSchema), getOneRecipe)
-  .put(protectedRoutes, validate(updateRecipeSchema), upload, updateRecipe)
-  .delete(protectedRoutes, validate(recipeIdSchema), deleteRecipe);
+  .put(
+    protectedRoutes,
+    allowedTo("admin"),
+    upload,
+    validate(updateRecipeSchema),
+    updateRecipe,
+  );
+recipeRouter
+  .route("/:id")
+  .delete(
+    protectedRoutes,
+    allowedTo("admin"),
+    validate(recipeIdSchema),
+    deleteRecipe,
+  );
 
 export { recipeRouter };

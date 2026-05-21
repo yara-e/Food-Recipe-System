@@ -13,18 +13,40 @@ import {
   categoryIdSchema,
 } from "../../validations/category.validation.js";
 import { protectedRoutes } from "../../middlewares/auth.middleware.js";
+import { allowedTo } from "../../middlewares/role.middleware.js";
 
 const categoryRouter = Router();
-categoryRouter.use(protectedRoutes);
-categoryRouter
-  .route("/")
-  .post(validate(addCategorySchema), addCategory)
-  .get(getAllCategories);
+// ==========================================
+// PUBLIC ROUTES
+// ==========================================
 
-categoryRouter
-  .route("/:id")
-  .get(validate(categoryIdSchema), getOneCategory)
-  .put(validate(updateCategorySchema), updateCategory)
-  .delete(validate(categoryIdSchema), deleteCategory);
+categoryRouter.get("/", getAllCategories);
+categoryRouter.get("/:id", validate(categoryIdSchema), getOneCategory);
+
+// ==========================================
+// PROTECTED ROUTES
+// ==========================================
+categoryRouter.post(
+  "/",
+  protectedRoutes,
+  allowedTo("admin"),
+  validate(addCategorySchema),
+  addCategory,
+);
+categoryRouter.put(
+  "/:id",
+  protectedRoutes,
+  allowedTo("admin"),
+  validate(updateCategorySchema),
+  updateCategory,
+);
+
+categoryRouter.delete(
+  "/:id",
+  protectedRoutes,
+  allowedTo("admin"),
+  validate(categoryIdSchema),
+  deleteCategory,
+);
 
 export { categoryRouter };

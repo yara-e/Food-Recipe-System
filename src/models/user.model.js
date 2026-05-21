@@ -7,17 +7,20 @@ const userSchema = new Schema(
       required: true,
       trim: true,
     },
-     email: {
-       type: String,
-       required: true,
-       unique: true,
-       trim: true,
-       lowercase: true,
-     },
+    email: {
+      type: String,
+      required: true,
+      unique: true,
+      trim: true,
+      lowercase: true,
+    },
     password: {
       type: String,
       required: true,
       select: false,
+    },
+    passwordChangedAt: {
+      type: Date,
     },
     role: {
       type: String,
@@ -34,8 +37,7 @@ const userSchema = new Schema(
     },
     otpExpire: Date,
   },
-  {timestamps: true},
+  { timestamps: true },
 );
- 
 
 export const User = model("User", userSchema);

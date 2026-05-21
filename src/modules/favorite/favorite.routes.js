@@ -8,13 +8,9 @@ import {
 import { protectedRoutes } from "../../middlewares/auth.middleware.js";
 
 const favoriteRouter = Router();
+favoriteRouter.use(protectedRoutes);
 
-favoriteRouter.post(
-  "/",
-  protectedRoutes,
-  validate(toggleFavoriteSchema),
-  toggleFavorite,
-);
-favoriteRouter.get("/:userId", validate(getFavoritesSchema), getUserFavorites);
+favoriteRouter.post("/", validate(toggleFavoriteSchema), toggleFavorite);
+favoriteRouter.get("/", validate(getFavoritesSchema), getUserFavorites);
 
 export { favoriteRouter };
