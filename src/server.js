@@ -30,9 +30,13 @@ const port = process.env.PORT || 3000;
 app.use(express.json());
 app.use(cors());
 
-
 app.get("/", (req, res) => {
-  res.status(200).json({ status: "healthy", message: "Food Project API running smoothly on Vercel." });
+  res
+    .status(200)
+    .json({
+      status: "healthy",
+      message: "Food Project API running smoothly on Vercel.",
+    });
 });
 
 app.use("/uploads", express.static(path.join(process.cwd(), "uploads")));
@@ -43,6 +47,7 @@ app.use("/recipes", recipeRouter);
 app.use("/favorites", favoriteRouter);
 app.use("/auth", authRouter);
 app.use("/dashboard", dashboardRouter);
+
 app.get("/seed", async (req, res, next) => {
   let data = await axios.get(
     "https://forkify-api.herokuapp.com/api/search?q=pizza",
@@ -56,17 +61,22 @@ app.get("/seed", async (req, res, next) => {
     categoryId: "6a1d9fa70032cdd2c36046bb",
   }));
 
- let SentData = await Recipe.insertMany(formateData)
- res.json({SentData})
+  let SentData = await Recipe.insertMany(formateData);
+  res.json({ SentData });
 });
+
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
 });
 
 app.use(globalError);
 
-dbConnect().then(() => {
+export default app;
+
+dbConnect();
+
+if (process.env.NODE_ENV !== "production") {
   app.listen(port, () => {
-    console.log(`Server running on port ${port}`);
+    console.log(`Server running locally on port ${port}`);
   });
-});
+}
