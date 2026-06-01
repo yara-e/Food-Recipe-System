@@ -52,12 +52,12 @@ app.get("/seed", async (req, res, next) => {
     title: recipe.title,
     description: recipe.title + " " + recipe.publisher,
     image: recipe.image_url,
-    createdBy: "6a1cbb16e8758c707cf99155",
-    categoryId: "69f7090ba0c3e8f51c2cea7d",
+    createdBy: "6a1d9a476f776cb79c5f9631",
+    categoryId: "6a1d9fa70032cdd2c36046bb",
   }));
 
  let SentData = await Recipe.insertMany(formateData)
- res.json({sentData})
+ res.json({SentData})
 });
 app.use((req, res, next) => {
   next(new AppError(`Can't find ${req.originalUrl} on this server`, 404));
