@@ -32,10 +32,9 @@ const userSchema = new Schema(
       enum: ["active", "inactive"],
       default: "active",
     },
-    otp: {
-      type: String,
-    },
-    otpExpire: Date,
+    otpCode: { type: String, select: false },
+    otpExpiresAt: { type: Date, select: false },
+    isOtpVerified: { type: Boolean, default: false, select: false }
   },
   { timestamps: true },
 );

@@ -12,6 +12,7 @@ import {
   addRecipeSchema,
   updateRecipeSchema,
   recipeIdSchema,
+  getAllRecipesSchema,
 } from "../../validations/recipe.validation.js";
 import { upload } from "../../utils/upload.js";
 import { allowedTo } from "../../middlewares/role.middleware.js";
@@ -21,7 +22,7 @@ const recipeRouter = Router();
 // ==========================================
 // PUBLIC ROUTES
 // ==========================================
-recipeRouter.route("/").get(getAllRecipes);
+recipeRouter.route("/").get(validate(getAllRecipesSchema),getAllRecipes);
 recipeRouter.route("/:id").get(validate(recipeIdSchema), getOneRecipe);
 
 // ==========================================
@@ -53,5 +54,7 @@ recipeRouter
     validate(recipeIdSchema),
     deleteRecipe,
   );
+
+
 
 export { recipeRouter };

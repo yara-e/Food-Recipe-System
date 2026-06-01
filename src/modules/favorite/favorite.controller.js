@@ -21,7 +21,7 @@ export const toggleFavorite = catchError(async (req, res, next) => {
 });
 
 export const getUserFavorites = catchError(async (req, res, next) => {
-  const { userId } = req.user._id;
+  const  userId  = req.user._id;
 
   const favorites = await Favorite.find({ userId }).populate(
     "recipeId",

@@ -19,11 +19,43 @@ export const signUpSchema = Joi.object({
       "any.required": "Password is required",
     }),
   }).unknown(false),
-});
+
+  params: Joi.object().optional(),
+  query: Joi.object().optional(),
+}).unknown(false);
 
 export const signInSchema = Joi.object({
   body: Joi.object({
     email: Joi.string().email().required(),
     password: Joi.string().required(),
   }).unknown(false),
-});
+  params: Joi.object().optional(),
+  query: Joi.object().optional(),
+}).unknown(false);
+
+
+export const forgetPasswordSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required()
+  }).unknown(false),
+  params: Joi.object().optional(),
+  query: Joi.object().optional()
+}).unknown(false);
+
+export const verifyOtpSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required(),
+    otp: Joi.string().length(6).required()
+  }).unknown(false),
+  params: Joi.object().optional(),
+  query: Joi.object().optional()
+}).unknown(false);
+
+export const resetPasswordSchema = Joi.object({
+  body: Joi.object({
+    email: Joi.string().email().required(),
+    newPassword: Joi.string().min(6).required()
+  }).unknown(false),
+  params: Joi.object().optional(),
+  query: Joi.object().optional()
+}).unknown(false);

@@ -1,7 +1,9 @@
 import { Recipe } from "../../models/recipe.model.js";
+import {Category} from "../../models/category.model.js"
 import { deleteFiles } from "../../utils/deleteFile.js";
 import { catchError } from "../../utils/catchError.js";
 import { AppError } from "../../utils/AppError.js";
+import { model } from 'mongoose';
 
 export const addRecipe = catchError(async (req, res, next) => {
   const { title, description, categoryId } = req.body;
@@ -27,12 +29,55 @@ export const addRecipe = catchError(async (req, res, next) => {
   res.status(201).json({ message: "success", data: recipe });
 });
 
-export const getAllRecipes = catchError(async (req, res, next) => {
-  const recipes = await Recipe.find()
-    .populate("categoryId", "name")
-    .populate("createdBy", "name email");
+ 
 
-  res.status(200).json({ message: "success", data: recipes });
+export const getAllRecipes = catchError(async (req, res, next) => {
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const categoryName = req.query.category; 
+  const fields = req.query.fields; 
+
+  const filterObj = {};
+ 
+  if (categoryName) {
+    const categoryDoc = await Category.findOne({ 
+      name: { $regex: new RegExp(`^${categoryName}$`, "i") } 
+    });
+
+    if (categoryDoc) {
+      filterObj.categoryId = categoryDoc._id;
+    } else {
+      filterObj.categoryId = null;
+    }
+  }
+
+  const skip = (page - 1) * limit;
+  const totalResults = await Recipe.countDocuments(filterObj);
+
+  let recipeQuery = Recipe.find(filterObj)
+    .populate("categoryId", "name")
+    .populate("createdBy", "name email")
+    .skip(skip)
+    .limit(limit);
+
+  if (fields) {
+    const selectedFieldsString = fields.split(",").join(" ");
+    recipeQuery = recipeQuery.select(selectedFieldsString);
+  } else {
+    recipeQuery = recipeQuery.select("-__v");
+  }
+
+  const recipes = await recipeQuery;
+  
+  const totalPages = Math.ceil(totalResults / limit) || 1;
+
+  res.status(200).json({
+    message: "success",
+    currentPage: page,
+    totalPages: totalPages,
+    totalResults: totalResults,
+    data: recipes,
+  });
 });
 
 export const getOneRecipe = catchError(async (req, res, next) => {

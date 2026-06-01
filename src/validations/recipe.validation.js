@@ -33,7 +33,9 @@ export const addRecipeSchema = Joi.object({
     "array.min": "At least one recipe image is required",
     "any.required": "Recipe image files are required",
   }),
-});
+  params: Joi.object().optional(),
+  query: Joi.object().optional(),
+}).unknown(false);
 
 export const updateRecipeSchema = Joi.object({
   params: Joi.object({
@@ -46,10 +48,25 @@ export const updateRecipeSchema = Joi.object({
   })
     .min(1)
     .unknown(false),
-});
+  query: Joi.object().optional(),
+}).unknown(false);
 
 export const recipeIdSchema = Joi.object({
   params: Joi.object({
     id: objectIdValidation.required(),
   }).unknown(false),
-});
+  query: Joi.object().optional(),
+  body: Joi.object().optional(),
+}).unknown(false);
+
+export const getAllRecipesSchema = Joi.object({
+  body: Joi.object().optional(),
+  params: Joi.object().optional(),
+
+  query: Joi.object({
+    page: Joi.number().integer().min(1).optional(),
+    limit: Joi.number().integer().min(1).optional(),
+    category: Joi.string().min(2).max(50).optional(),
+    fields: Joi.string().optional()
+  }).unknown(false),
+}).unknown(false);

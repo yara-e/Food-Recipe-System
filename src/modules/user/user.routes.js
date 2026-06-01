@@ -10,6 +10,7 @@ import {
 import { validate } from "../../middlewares/validation.middleware.js";
 import {
   addUserSchema,
+  getAllUsersSchema,
   updateUserSchema,
   UserIdSchema,
 } from "../../validations/user.validation.js";
@@ -22,7 +23,7 @@ userRouter.use(protectedRoutes);
 // ==========================================
 // ADMIN ONLY ROUTES
 // ==========================================
-userRouter.get("/", allowedTo("admin"), getAllUsers);
+userRouter.get("/", allowedTo("admin"), validate(getAllUsersSchema),getAllUsers);
 
 userRouter.delete(
   "/:id",
@@ -37,10 +38,12 @@ userRouter.put(
   updateUser,
 );
 
+userRouter.post("/", allowedTo("admin"), validate(addUserSchema), addUser);
+
 // ==========================================
 // ALL USERS ACCESS ROUTE (USER PROFILE / ADMIN LOOKUP)
 // ==========================================
 
-userRouter.get("/:id", protectedRoutes, getOneUser);
+userRouter.get("/:id", getOneUser);
 
 export { userRouter };

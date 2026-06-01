@@ -4,10 +4,6 @@ import { catchError } from "../../utils/catchError.js";
 import { AppError } from "../../utils/AppError.js";
 
 export const addUser = catchError(async (req, res, next) => {
-  if (!req.body.name || !req.body.email || !req.body.password) {
-    return next(new AppError("Name, email, and password are required", 400));
-  }
-
   req.body.password = await hashPassword(req.body.password);
 
   let data = new User(req.body);
@@ -18,8 +14,21 @@ export const addUser = catchError(async (req, res, next) => {
 });
 
 export const getAllUsers = catchError(async (req, res, next) => {
-  let data = await User.find().select("-password");
-  res.status(200).json({ message: "success", data });
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+  const totalResults = await User.countDocuments();
+  const users = await User.find().select("-password").skip(skip).limit(limit);
+
+  const totalPages = Math.ceil(totalResults / limit) || 1;
+
+  res.status(200).json({
+    message: "success",
+    currentPage: page,
+    totalPages: totalPages,
+    totalResults: totalResults,
+    data: users,
+  });
 });
 
 export const getOneUser = catchError(async (req, res, next) => {
@@ -43,6 +52,13 @@ export const getOneUser = catchError(async (req, res, next) => {
 
 export const updateUser = catchError(async (req, res, next) => {
   let { id } = req.params;
+  const loggedInUser = req.user;
+
+  if (loggedInUser.role !== "admin" && loggedInUser._id.toString() !== id) {
+    return next(
+      new AppError("Access denied. You can only update your own profile.", 403),
+    );
+  }
   const { name, email } = req.body;
 
   let data = await User.findByIdAndUpdate(

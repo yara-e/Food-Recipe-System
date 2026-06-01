@@ -11,11 +11,29 @@ export const addCategory = catchError(async (req, res, next) => {
   const category = new Category({ name, description });
   await category.save();
   res.status(201).json({ message: "success", data: category });
-});
+}); 
 
 export const getAllCategories = catchError(async (req, res, next) => {
-  const categories = await Category.find();
-  res.status(200).json({ message: "success", data: categories });
+ 
+  const page = parseInt(req.query.page, 10) || 1;
+  const limit = parseInt(req.query.limit, 10) || 10;
+  const skip = (page - 1) * limit;
+
+  const totalResults = await Category.countDocuments();
+
+  const categories = await Category.find()
+    .skip(skip)
+    .limit(limit);
+
+  const totalPages = Math.ceil(totalResults / limit) || 1;
+
+  res.status(200).json({
+    message: "success",
+    currentPage: page,
+    totalPages: totalPages,
+    totalResults: totalResults,
+    data: categories,
+  });
 });
 
 export const getOneCategory = catchError(async (req, res, next) => {

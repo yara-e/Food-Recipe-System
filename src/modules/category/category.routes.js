@@ -11,6 +11,7 @@ import {
   addCategorySchema,
   updateCategorySchema,
   categoryIdSchema,
+  getAllCategoriesSchema,
 } from "../../validations/category.validation.js";
 import { protectedRoutes } from "../../middlewares/auth.middleware.js";
 import { allowedTo } from "../../middlewares/role.middleware.js";
@@ -20,7 +21,7 @@ const categoryRouter = Router();
 // PUBLIC ROUTES
 // ==========================================
 
-categoryRouter.get("/", getAllCategories);
+categoryRouter.get("/",validate(getAllCategoriesSchema), getAllCategories);
 categoryRouter.get("/:id", validate(categoryIdSchema), getOneCategory);
 
 // ==========================================
